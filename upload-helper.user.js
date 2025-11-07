@@ -1128,6 +1128,18 @@
       }
     }
 
+    const isValid = !!(
+      posterUrl &&
+      title &&
+      authors.length >= 1 &&
+      cat &&
+      mediaType &&
+      mainCat &&
+      categories.length >= 1 &&
+      tags &&
+      mediaInfo
+    )
+
     div.innerHTML = `<div id="torDetMainCon">
   <div id="posterHolder" style="width: 302px; height: 302px">&nbsp;</div>
   <img id="torDetPoster" src="${posterUrl}" class="torDetPoster" />
@@ -1253,7 +1265,7 @@
       <div id="torDesc" class="torDetInnerBottom"></div>
     </div>
   </div>
-  ${posterUrl ? `<input type="submit" form="uploadFormForm" value="Upload Torrent">` : ''}
+  ${isValid ? `<input type="submit" form="uploadFormForm" value="Upload Torrent">` : ''}
 </div>
 `
 
