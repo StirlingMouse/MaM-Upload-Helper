@@ -139,6 +139,11 @@
       a.altColor[href="#"] {
         background-color: var(--red-background);
       }
+      .torDetPoster:hover {
+        max-width: 95vw;
+        max-height: 95vh;
+        cursor: zoom-out;
+      }
     }
  `
   document.body.appendChild(styles)
