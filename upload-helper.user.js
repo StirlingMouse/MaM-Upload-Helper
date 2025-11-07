@@ -402,8 +402,24 @@
 
   // Poster
   {
-    const fileInput = uploadForm.querySelector('input[name="poster"]')
-    const urlInput = uploadForm.querySelector('input[name="tor[posterURL]"]')
+    const tr = document.createElement('tr')
+    tr.innerHTML = `
+      <td class="row2">Poster</td>
+      <td class="row2">
+        <img style="float:right; max-width: 400px; max-height: 400px;">
+        Upload: <input autocomplete="off" name="poster" type="file" accept="image/*"><br>
+        By URL: <input autocomplete="off" name="tor[posterURL]" type="text" value=""><br>
+        <input type="checkbox" name="tor[noPoster]"> I can not find a poster to include for this upload</label><br>
+      </td>
+    `
+    const origFileInput = uploadForm.querySelector('input[name="poster"]')
+    origFileInput.parentElement.parentElement.remove()
+    const isbnRow = uploadForm.querySelector('tr:has(input[name="tor[isbn]"])')
+    isbnRow.parentElement.insertBefore(tr, isbnRow)
+
+    const fileInput = tr.querySelector('input[name="poster"]')
+    const urlInput = tr.querySelector('input[name="tor[posterURL]"]')
+    const img = tr.querySelector('img')
 
     fileInput.addEventListener('change', () => {
       if (fileInput.files.length === 1) {
