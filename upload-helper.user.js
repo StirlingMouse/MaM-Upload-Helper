@@ -776,6 +776,7 @@
       const target = e.target
       if (target?.tagName !== 'INPUT') return
       if (target === document.activeElement) return
+      if (target.name.endsWith('[extra]')) return
 
       acFieldSearch(target, target.value, type)
     }
