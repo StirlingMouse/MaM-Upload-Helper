@@ -343,6 +343,7 @@
       Classic: 28,
       Music: 32,
       Mystery: 34,
+      Nature: 35,
       Poetry: 38,
       Romance: 42,
       SF: 45,
@@ -352,6 +353,7 @@
       Western: 54,
       YA: 55,
       'Young Adult': 55,
+      'Literary Fiction': 57,
     }
     tags?.addEventListener('input', () => {
       const text = tags.value
