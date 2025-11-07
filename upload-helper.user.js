@@ -163,27 +163,34 @@
     filesTable.parentElement.appendChild(a)
   }
 
+  function getSearchQuery() {
+    const form = document.querySelector('form[action="/tor/upload.php"]')
+    const data = new FormData(form)
+    const title = data.get('tor[title]')
+    const authors = data.getAll('tor[author][]').filter(Boolean)
+    const query =
+      title && authors.length >= 1
+        ? `${title.split(':')[0]} ${authors[0]}`
+        : fullTitle
+    return query
+  }
+  function onQueryChanged(callback) {
+    const title = uploadForm.querySelector('input[name="tor[title]"]')
+    title.addEventListener('input', callback)
+    const authors = uploadForm.querySelector('#tdAuth')
+    authors.addEventListener('input', callback)
+  }
+
   if (files) {
     const filesTable = files.querySelector('table')
     const a = document.createElement('a')
-    a.href =
-      `https://www.goodreads.com/search?q=` + encodeURIComponent(fullTitle)
+    a.href = `https://www.goodreads.com/search?q=${encodeURIComponent(fullTitle)}`
     a.target = 'goodreads'
     a.textContent = 'Goodreads'
     a.style = 'margin-right: 20px;'
     filesTable.parentElement.appendChild(a)
-    a.addEventListener('click', (e) => {
-      const title = document.querySelector('input[name="tor[title]"]')?.value
-      const author = document.querySelector(
-        'input[name="tor[author][]"]',
-      )?.value
-      if (title && author) {
-        const query = `${title} ${author}`
-        e.preventDefault()
-        window.open(
-          `https://www.goodreads.com/search?q=` + encodeURIComponent(query),
-        )
-      }
+    onQueryChanged(() => {
+      a.href = `https://www.goodreads.com/search?q=${encodeURIComponent(getSearchQuery())}`
     })
   }
 
@@ -198,42 +205,22 @@
     a.textContent = 'Storytel'
     a.style = 'margin-right: 20px;'
     filesTable.parentElement.appendChild(a)
-    a.addEventListener('click', (e) => {
-      const title = document.querySelector('input[name="tor[title]"]')?.value
-      const author = document.querySelector(
-        'input[name="tor[author][]"]',
-      )?.value
-      if (title && author) {
-        const query = `${title} ${author}`
-        e.preventDefault()
-        window.open(
-          `https://www.storytel.com/se/search/all?query=` +
-            encodeURIComponent(query) +
-            '&formats=abook%2Cebook',
-        )
-      }
+    onQueryChanged(() => {
+      a.href = `https://www.storytel.com/se/search/all?query=${encodeURIComponent(
+        getSearchQuery(),
+      )}&formats=abook%2Cebook`
     })
   }
 
   if (files) {
     const filesTable = files.querySelector('table')
     const a = document.createElement('a')
-    a.href = `https://www.romance.io/search?q=` + encodeURIComponent(fullTitle)
+    a.href = `https://www.romance.io/search?q=${encodeURIComponent(fullTitle)}`
     a.target = 'romance.io'
     a.textContent = 'romance.io'
     filesTable.parentElement.appendChild(a)
-    a.addEventListener('click', (e) => {
-      const title = document.querySelector('input[name="tor[title]"]')?.value
-      const author = document.querySelector(
-        'input[name="tor[author][]"]',
-      )?.value
-      if (title && author) {
-        const query = `${title} ${author}`
-        e.preventDefault()
-        window.open(
-          `https://www.romance.io/search?q=` + encodeURIComponent(query),
-        )
-      }
+    onQueryChanged(() => {
+      a.href = `https://www.romance.io/search?q=${encodeURIComponent(getSearchQuery())}`
     })
   }
 
@@ -847,7 +834,11 @@
       uploadForm.querySelector('input[name="tor[isbn]"]').value = json.isbn
     }
     if (json.title) {
-      uploadForm.querySelector('input[name="tor[title]"]').value = json.title
+      const input = uploadForm.querySelector('input[name="tor[title]"]')
+      input.value = json.title
+      setTimeout(() => {
+        input.dispatchEvent(new Event('input', { target: input }))
+      })
     }
     if (json.tags) {
       uploadForm.querySelector('input[name="tor[tags]"]').value = json.tags
