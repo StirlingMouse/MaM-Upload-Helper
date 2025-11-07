@@ -672,6 +672,14 @@
               } else {
                 checkbox.checked = false
               }
+              e.currentTarget.animate(
+                [
+                  { filter: 'hue-rotate(0deg)' },
+                  { filter: 'hue-rotate(180deg)' },
+                  { filter: 'hue-rotate(0deg)' },
+                ],
+                { duration: 300 },
+              )
             })
           links
             .querySelector(`#clone${t.id}`)
