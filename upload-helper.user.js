@@ -226,20 +226,16 @@
 
   // JSON fill
   {
-    const fillJsonButton = uploadForm.querySelector('#fillJson')
-    const fillJsonFile = document.createElement('input')
-    fillJsonFile.type = 'file'
-    const fillJsonText = document.createElement('input')
-    fillJsonText.type = 'text'
-    fillJsonButton.parentElement.appendChild(
-      document.createTextNode('JSON File:'),
-    )
-    fillJsonButton.parentElement.appendChild(fillJsonFile)
-    fillJsonButton.parentElement.appendChild(document.createElement('br'))
-    fillJsonButton.parentElement.appendChild(
-      document.createTextNode('JSON Text:'),
-    )
-    fillJsonButton.parentElement.appendChild(fillJsonText)
+    uploadForm.querySelector('#fillJson')?.remove()
+
+    const fillRow = document.createElement('tr')
+    fillRow.className = 'torDetRow'
+    fillRow.innerHTML =
+      '<td class="row1">Fast Fill</td><td class="row1"><input type=file><br><input type=text></div>'
+    const fillJsonFile = fillRow.querySelector('input[type="file"]')
+    const fillJsonText = fillRow.querySelector('input[type="text"]')
+
+    uploadForm.insertBefore(fillRow, files.nextElementSibling)
     fillJsonFile.addEventListener('change', () => {
       if (fillJsonFile.files.length === 1) {
         fillJsonText.value = ''
@@ -260,7 +256,6 @@
         jsonFill(JSON.parse(fillJsonText.value))
       }
     })
-    fillJsonButton.remove()
   }
 
   // Categories
