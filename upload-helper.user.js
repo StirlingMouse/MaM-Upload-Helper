@@ -1109,11 +1109,20 @@
     try {
       mediaInfo = JSON.parse(mediaInfoRaw)
     } catch {}
+    const mediaGeneral = mediaInfo?.media?.track?.find(
+      (t) => t['@type'] === 'General',
+    )
+    const mediaAudio = mediaInfo?.media?.track?.find(
+      (t) => t['@type'] === 'Audio',
+    )
+    const mediaMenu = mediaInfo?.media?.track?.find(
+      (t) => t['@type'] === 'Menu',
+    )
+
     let media
-    if (mediaInfo.media.track[0]) {
-      const track = mediaInfo.media.track[0]
-      const hrs = Math.floor(+track.Duration / 60 / 60)
-      const mins = Math.floor((+track.Duration / 60) % 60)
+    if (mediaGeneral) {
+      const hrs = Math.floor(+mediaGeneral.Duration / 60 / 60)
+      const mins = Math.floor((+mediaGeneral.Duration / 60) % 60)
       media = {
         hrs,
         mins,
@@ -1123,10 +1132,15 @@
             : hrs
               ? `${hrs} hrs`
               : `${mins} mins`,
-        bitrate: Math.floor(+track.OverallBitRate / 1000),
-        type: track.OverallBitRate_Mode,
+        bitrate: Math.floor(+mediaGeneral.OverallBitRate / 1000),
+        type: mediaGeneral.OverallBitRate_Mode,
       }
     }
+    const chapters =
+      mediaMenu &&
+      Object.entries(mediaMenu.extra)
+        .filter(([key]) => key.startsWith('_'))
+        .map(([_, value]) => value)
 
     const isValid = !!(
       posterUrl &&
@@ -1263,6 +1277,39 @@
     <div id="torDetDesc" class="torDetInnerCon">
       <div class="torDetInnerTop">Description</div>
       <div id="torDesc" class="torDetInnerBottom"></div>
+    </div>
+    ${
+      media
+        ? `<div class="torDetInnerCon">
+      <div class="torDetInnerTop ">Media Info</div>
+      <div class="torDetInnerBottom" style="text-align:left;overflow:auto">
+        <div style="padding-left: 2em;"><b>General</b>
+          <div style="padding-left: 2em;"><b>Title</b>: ${mediaGeneral.Title}</div>
+          <div style="padding-left: 2em;"><b>Format</b>: ${mediaGeneral.Format}</div>
+          <div style="padding-left: 2em;"><b>Duration</b>: ${media.duration}</div>
+        </div>
+        ${
+          mediaAudio
+            ? `<div style="padding-left: 2em;"><b>Audio1</b>
+          <div style="padding-left: 2em;"><b>Compression_Mode</b>: ${mediaAudio.Compression_Mode}</div>
+          <div style="padding-left: 2em;"><b>Channels</b>: ${mediaAudio.Channels}</div>
+          <div style="padding-left: 2em;"><b>BitRate_Mode</b>: ${mediaAudio.BitRate_Mode}</div>
+          <div style="padding-left: 2em;"><b>BitRate</b>: ${Math.floor(mediaAudio.BitRate / 1000)}k</div>
+          <div style="padding-left: 2em;"><b>BitRate_Maximum</b>: ${Math.floor(mediaAudio.BitRate_Maximum / 1000)}k</div>
+          <div style="padding-left: 2em;"><b>Format</b>: ${mediaAudio.Format}</div>
+        </div>`
+            : ''
+        }
+        ${
+          chapters
+            ? `<div style="padding-left: 2em;"><b>Chapters</b>
+          ${chapters.map((chapter, i) => `<div style="padding-left: 2em;"><b>${i}:</b> ${chapter}</div>`).join('')}
+        </div>`
+            : ''
+        }
+      </div>`
+        : ''
+    }
     </div>
   </div>
   ${isValid ? `<input type="submit" form="uploadFormForm" value="Upload Torrent">` : ''}
