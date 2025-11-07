@@ -426,25 +426,36 @@
     })
   }
 
-  const otherRow = document.createElement('tr')
-  otherRow.className = 'torDetRow'
-  otherRow.innerHTML =
-    '<td class="row1">Other Torrents</td><td class="row1 otherTorrents-container"><input id="otherTorrents-query" style="width:100%"><table class="newTorTable"></table></div>'
-  const table = otherRow.querySelector('table')
+  // Other torrents with search
+  let otherTorrentsSearchTable
+  let otherTorrentsSearchQuery
+  let otherTorrentsResearchOnFill = false
+  {
+    const otherRow = document.createElement('tr')
+    otherRow.className = 'torDetRow'
+    otherRow.innerHTML =
+      '<td class="row1">Other Torrents</td><td class="row1 otherTorrents-container"><input id="otherTorrents-query" style="width:100%"><table class="newTorTable"></table></div>'
+    uploadForm.insertBefore(
+      otherRow,
+      files.nextElementSibling.nextElementSibling,
+    )
+    otherTorrentsSearchTable = otherRow.querySelector('table')
 
-  const queryInput = otherRow.querySelector('#otherTorrents-query')
-  let lastQuery = title
-  queryInput.value = lastQuery
-  queryInput.addEventListener('blur', (e) => {
-    if (e.currentTarget.value !== lastQuery) {
-      lastQuery = e.currentTarget.value
+    otherTorrentsSearchQuery = otherRow.querySelector('#otherTorrents-query')
+    let lastQuery = title
+    otherTorrentsSearchQuery.value = lastQuery
+    otherTorrentsSearchQuery.addEventListener('blur', (e) => {
+      if (e.currentTarget.value !== lastQuery) {
+        lastQuery = e.currentTarget.value
 
-      searchTorrents(lastQuery, true)
-    }
-  })
-  searchTorrents(lastQuery)
+        searchTorrents(lastQuery, true)
+      }
+    })
+    searchTorrents(lastQuery)
+  }
 
   async function searchTorrents(query, includeAuthor = false) {
+    otherTorrentsSearchQuery.value = query
     const response = await fetch(
       'https://www.myanonamouse.net/tor/js/loadSearchJSONbasic.php',
       {
@@ -464,8 +475,9 @@
       },
     )
     const body = await response.json()
+    otherTorrentsResearchOnFill = body.data?.length > 10
     console.log('MaM Upload Helper response', body)
-    addOtherTorrents(table, body)
+    addOtherTorrents(otherTorrentsSearchTable, body)
   }
 
   function addOtherTorrents(table, body, uploadHelpers = true) {
@@ -706,8 +718,6 @@
     }
   }
 
-  uploadForm.insertBefore(otherRow, files.nextElementSibling)
-
   {
     const submit = uploadForm.querySelector(
       'input[type="submit"][value="Submit"]',
@@ -906,6 +916,11 @@
       uploadForm.querySelector('textarea[name="tor[mediaInfo]"]').value =
         json.mediaInfo
     }
+
+    if (otherTorrentsResearchOnFill && json.title && json.authors?.[0]) {
+      searchTorrents(`${json.title} ${json.authors[0]}`, true)
+    }
+    otherTorrentsSearchQuery?.focus()
   }
   function check(name, value) {
     if (typeof value === 'number') {
