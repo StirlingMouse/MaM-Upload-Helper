@@ -936,9 +936,15 @@
       const input = uploadForm.querySelector(`input[${name}][value="${value}"]`)
       if (input) input.checked = true
     } else {
+      value = value.toLowerCase().replaceAll(/[^a-z/ -]/g, '')
       const input = Array.from(
         uploadForm.querySelectorAll(`input[${name}]`),
-      ).find((input) => input.parentElement.textContent === value)
+      ).find(
+        (input) =>
+          input.parentElement.textContent
+            .toLowerCase()
+            .replaceAll(/[^a-z/ -]/g, '') === value,
+      )
       if (input) input.checked = true
     }
   }
@@ -948,8 +954,10 @@
       const opt = select.querySelector(`option[value="${value}"]`)
       if (opt) opt.selected = true
     } else {
+      value = value.toLowerCase().replaceAll(/[^a-z/ -]/g, '')
       const opt = Array.from(select.querySelectorAll(`option`)).find(
-        (opt) => opt.textContent.toLowerCase() === value.toLowerCase(),
+        (opt) =>
+          opt.textContent.toLowerCase().replaceAll(/[^a-z/ -]/g, '') === value,
       )
       if (opt) opt.selected = true
     }
