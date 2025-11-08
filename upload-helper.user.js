@@ -333,7 +333,6 @@
       Biography: 3,
       Autobiography: 3,
       Crime: 9,
-      Drama: 10,
       'Full Cast': 10,
       Fantasy: 13,
       Historical: 17,
