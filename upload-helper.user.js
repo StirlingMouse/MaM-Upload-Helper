@@ -1150,7 +1150,7 @@
       mainCat &&
       categories.length >= 1 &&
       tags &&
-      mediaInfo
+      (mediaInfo || mediaType !== 'Audiobook')
     )
 
     div.innerHTML = `<div id="torDetMainCon">
