@@ -78,6 +78,7 @@
         height: unset;
         font-size: 12pt;
         width: 200px;
+        img { display: none; }
       }
 
       label.mainCategories,
