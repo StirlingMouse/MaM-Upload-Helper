@@ -1057,14 +1057,12 @@
     const mainCat = uploadForm.querySelector(
       `input[name="tor[main_cat]"][value="${mainCatId}"]`,
     )?.parentElement?.textContent
-    const categories = data
-      .getAll('tor[categories][]')
-      .map(
-        (cat) =>
-          uploadForm.querySelector(
-            `input[name="tor[categories][]"][value="${cat}"]`,
-          )?.parentElement?.textContent,
-      )
+    const categories = data.getAll('tor[categories][]').map((id) => ({
+      id,
+      name: uploadForm.querySelector(
+        `input[name="tor[categories][]"][value="${id}"]`,
+      )?.parentElement?.textContent,
+    }))
     const languageId = data.get('tor[language]')
     const language = uploadForm.querySelector(
       `select[name="tor[language]"] option[value="${languageId}"]`,
@@ -1229,8 +1227,8 @@
         <a class="newCatLink" href="/tor/browse.php?tor[cat][]]=${cat}">
           <div class="cat${cat}">&nbsp;</div>
         </a>
-        <span>${mediaType}<br>${mainCat}</span>
-	<div class="categoriesPreview">${categories.map((cat) => `<div class="categoryPreview">${cat}</div>`).join('')}</div>
+        <a class="newCatLink" href="#" title="${mediaType} - ${mainCat}"><div class="media${mediaTypeId}-${mainCatId}">&nbsp;</div></a>
+        <div id="multiCat">${categories.map((cat) => `<a class="mCat" data-mcatid="${cat.id}">${cat.name}</a>`).join('')}</div>
       </span>
     </div>
   </div>
