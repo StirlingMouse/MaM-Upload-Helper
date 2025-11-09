@@ -850,6 +850,11 @@
   }
 
   function jsonFill(json) {
+    document.querySelector('input[name="qjf"]').value = JSON.stringify(
+      json,
+      null,
+      4,
+    )
     if (json.isbn) {
       uploadForm.querySelector('input[name="tor[isbn]"]').value = json.isbn
     }
