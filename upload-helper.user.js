@@ -349,6 +349,7 @@
       Music: 32,
       Mystery: 34,
       Nature: 35,
+      Paranormal: 36,
       Poetry: 38,
       Romance: 42,
       SF: 45,
