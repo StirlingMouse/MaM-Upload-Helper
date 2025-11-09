@@ -939,6 +939,18 @@
       searchTorrents(`${json.title} ${json.authors[0]}`, true)
     }
     otherTorrentsSearchQuery?.focus()
+    if (
+      localStorage.getItem('uploadFormHelper::jsonFill') !==
+      'I will check that information is correct'
+    ) {
+      setTimeout(() => {
+        alertBox(
+          'Fast Fill out complete',
+          'The fast filling in via json has been completed.<br /><br />It is now <strong>your duty</strong> to check that the information is correct.<br /><br />This fast option is a privilege, that is being abused.<br />This continued abuse by some are putting it at risk of being removed.<br />Please check that the information is correct and matches rules and regulations.',
+          800,
+        )
+      })
+    }
   }
   function check(name, value) {
     if (typeof value === 'number') {
