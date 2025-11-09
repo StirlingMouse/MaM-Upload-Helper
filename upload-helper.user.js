@@ -1149,7 +1149,10 @@
       mediaMenu &&
       Object.entries(mediaMenu.extra)
         .filter(([key]) => key.startsWith('_'))
-        .map(([_, value]) => value)
+        .map(([key, value]) => [
+          key.slice(1).split('_').slice(0, -1).join(':'),
+          value,
+        ])
 
     const isValid = !!(
       posterUrl &&
@@ -1312,7 +1315,7 @@
         ${
           chapters
             ? `<div style="padding-left: 2em;"><b>Chapters</b>
-          ${chapters.map((chapter, i) => `<div style="padding-left: 2em;"><b>${i}:</b> ${chapter}</div>`).join('')}
+          ${chapters.map(([time, chapter]) => `<div style="padding-left: 2em;"><b>${time}:</b> ${chapter}</div>`).join('')}
         </div>`
             : ''
         }
