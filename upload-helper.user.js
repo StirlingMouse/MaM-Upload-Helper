@@ -404,12 +404,6 @@
   {
     const fileInput = uploadForm.querySelector('input[name="poster"]')
     const urlInput = uploadForm.querySelector('input[name="tor[posterURL]"]')
-    const td = fileInput.parentElement
-    td.appendChild(document.createElement('br'))
-    const img = document.createElement('img')
-    img.style.maxWidth = '500px'
-    img.style.maxHeight = '500px'
-    td.append(img)
 
     fileInput.addEventListener('change', () => {
       if (fileInput.files.length === 1) {
