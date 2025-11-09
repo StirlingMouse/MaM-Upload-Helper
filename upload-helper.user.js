@@ -1313,9 +1313,9 @@
     </div>
     ${
       media
-        ? `<div class="torDetInnerCon">
-      <div class="torDetInnerTop ">Media Info</div>
-      <div class="torDetInnerBottom" style="text-align:left;overflow:auto">
+        ? `<div class="torDetInnerCon" style="width: 30em">
+      <div class="torDetInnerTop">Media Info</div>
+      <div class="torDetInnerBottom" style="text-align:left;overflow:auto;max-height:500px">
         <div style="padding-left: 2em;"><b>General</b>
           <div style="padding-left: 2em;"><b>Title</b>: ${mediaGeneral.Title}</div>
           <div style="padding-left: 2em;"><b>Format</b>: ${mediaGeneral.Format}</div>
