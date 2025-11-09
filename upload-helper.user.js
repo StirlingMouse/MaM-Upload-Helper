@@ -131,11 +131,20 @@
       }
       #torrentPreview {
         width: 98%;
-      }
-      .categoryPreview {
-	width: 170px;
-        background-color: var(--secondary-background);
-	border-radious: 5px;
+
+        .newCatLink {
+          position: relative;
+        }
+        .newCatLink::after {
+          content: "";
+          background-color: red;
+          width: 50px;
+          height: 50px;
+          position: absolute;
+          top: 5px;
+          left: 5px;
+          z-index: -1;
+        }
       }
       a.altColor[href="#"] {
         background-color: var(--red-background);
