@@ -5,7 +5,7 @@
 // @match       https://www.myanonamouse.net/t/*
 // @match       https://www.myanonamouse.net/tor/browse.php*
 // @grant       none
-// @version     0.1.0
+// @version     0.1.1
 // @author      Stirling Mouse
 // @downloadURL https://github.com/StirlingMouse/MaM-Upload-Helper/raw/refs/heads/main/backfill-helper.user.js
 // @updateURL   https://github.com/StirlingMouse/MaM-Upload-Helper/raw/refs/heads/main/backfill-helper.user.js
@@ -584,12 +584,12 @@
             observer.disconnect()
 
             for (const torrent of Object.values(currentBatch.torrents)) {
-              if (torrent.categories) {
+              const row = document.querySelector(`#tdr-${torrent.id}`)
+              if (!row) continue
+              if (row.querySelector('#searchMultiCat')) {
                 markComplete(torrent.id)
                 continue
               }
-              const row = document.querySelector(`#tdr-${torrent.id}`)
-              if (!row) continue
               const multiCat = document.createElement('div')
               multiCat.id = 'searchMultiCat'
 
