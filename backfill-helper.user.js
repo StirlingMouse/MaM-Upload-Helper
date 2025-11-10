@@ -90,6 +90,22 @@
       }
     }
 
+    @media (max-width: 1800px) {
+      #backfill-helper {
+        width: 600px;
+      }
+    }
+    @media (max-width: 1600px) {
+      #backfill-helper {
+        width: 800px;
+        margin-left: 2%;
+        max-width: 96%;
+      }
+      main {
+        flex-direction: column;
+      }
+    }
+
     #backfill-helper-batch-menu {
       position: fixed;
       right: 40px;
