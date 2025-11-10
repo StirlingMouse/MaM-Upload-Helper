@@ -5,8 +5,10 @@
 // @match       https://www.myanonamouse.net/t/*
 // @match       https://www.myanonamouse.net/tor/browse.php*
 // @grant       none
-// @version     1.0
-// @author      -
+// @version     0.1.0
+// @author      Stirling Mouse
+// @downloadURL https://github.com/StirlingMouse/MaM-Upload-Helper/raw/refs/heads/main/backfill-helper.user.js
+// @updateURL   https://github.com/StirlingMouse/MaM-Upload-Helper/raw/refs/heads/main/backfill-helper.user.js
 // ==/UserScript==
 
 ;(async () => {
