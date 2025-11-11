@@ -5,7 +5,7 @@
 // @match       https://www.myanonamouse.net/t/*
 // @match       https://www.myanonamouse.net/tor/browse.php*
 // @grant       none
-// @version     0.1.1
+// @version     0.1.2
 // @author      Stirling Mouse
 // @downloadURL https://github.com/StirlingMouse/MaM-Upload-Helper/raw/refs/heads/main/backfill-helper.user.js
 // @updateURL   https://github.com/StirlingMouse/MaM-Upload-Helper/raw/refs/heads/main/backfill-helper.user.js
@@ -256,8 +256,9 @@
       )
       const multiCat = document.querySelector('#fInfo #multiCat')
       const mediaInfoDisplay = document.querySelector('#mediaInfoDisplay')
-      const [, mediatype, maincat] =
-        newCatLink.className.match(/media(\d)-(\d)/)
+      const [, mediatype, maincat] = newCatLink?.className.match(
+        /media(\d)-(\d)/,
+      ) ?? [, 0, 0]
       mediaType = +mediatype
       const hasData =
         !!mediatype &&
