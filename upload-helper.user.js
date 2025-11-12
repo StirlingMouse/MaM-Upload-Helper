@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MaM Upload Helper
 // @namespace    Violentmonkey Scripts
-// @version      0.3.1
+// @version      0.3.2
 // @description  Adds other torrents, preview, check for creating new entities and more to the upload page
 // @author       Stirling Mouse
 // @match        https://www.myanonamouse.net/tor/upload.php
@@ -40,6 +40,32 @@
   const fullTitle = firstFile?.replace(/[[.].*/, '').trim()
   const asin = firstFile?.replace(/.*\[([A-Z0-9]+)\].*/, '$1').trim()
   const tags = uploadForm.querySelector('tr:has(input[name="tor[tags]"])')
+
+  let categoryData
+  try {
+    categoryData = JSON.parse(
+      localStorage.getItem('otherTorrents::categoryData'),
+    )
+  } catch {}
+  async function fetchCategoryData() {
+    const response = await fetch(
+      'https://www.myanonamouse.net/tor/json/categories.php?new',
+    )
+    const json = await response.json()
+    categoryData = {
+      categories: Object.fromEntries(
+        Object.values(json.categories).map((c) => [c.id, c.name]),
+      ),
+      media_types: Object.fromEntries(
+        Object.values(json.media_types).map((c) => [c.id, c.name]),
+      ),
+    }
+    localStorage.setItem(
+      'otherTorrents::categoryData',
+      JSON.stringify(categoryData),
+    )
+  }
+  if (!categoryData) await fetchCategoryData()
 
   const styles = document.createElement('style')
   styles.innerHTML = `
@@ -502,10 +528,10 @@
     const body = await response.json()
     otherTorrentsResearchOnFill = body.data?.length > 10
     console.log('MaM Upload Helper response', body)
-    addOtherTorrents(otherTorrentsSearchTable, body)
+    await addOtherTorrents(otherTorrentsSearchTable, body)
   }
 
-  function addOtherTorrents(table, body, uploadHelpers = true) {
+  async function addOtherTorrents(table, body, uploadHelpers = true) {
     let added = false
     if (body.data) {
       table.innerHTML = ''
@@ -514,7 +540,7 @@
         added = true
 
         const row = document.createElement('tr')
-        row.innerHTML = `<td>${t.cat}</td><td></td><td class="expand"><div class="posterImage"><img></div><a class="torTitle"></a> by <a class="author"></a><br><span class="torNarrator">Narrated by: <a class="narrator"></a></span> | <span class="series_info"><span class="torSeries"> Series: <a class="series" href=""></a></span></span><br></span><span class="torRowDesc"></span><br><span class="torFileTypes"><a></a></span> | <span class="comments"></span> comments</td><td></td><td class="shrink"><a></a><br></td><td></td><td><p>0</p><p>0</p><p>0</p></td>`
+        row.innerHTML = `<td>${t.cat}</td><td><div style="width:79px;"></div><div class="posterImage"><img></div></td><td class="expand"><a class="torTitle"></a> by <a class="author"></a><br><span class="torNarrator">Narrated by: <a class="narrator"></a></span> | <span class="series_info"><span class="torSeries"> Series: <a class="series" href=""></a></span></span><br></span><span class="torRowDesc"></span><br><span class="torFileTypes"><a></a></span> | <span class="comments"></span> comments</td><td></td><td class="shrink"><a></a><br></td><td></td><td><p>0</p><p>0</p><p>0</p></td>`
         const poster = row.querySelector('.posterImage img')
         const title = row.querySelector('.torTitle')
         let author = row.querySelector('.author')
@@ -646,6 +672,32 @@
           snatched.className = 'browseAct'
           snatched.innerHTML = 'Previously Downloaded'
           info.appendChild(snatched)
+        }
+        if (t.categories) {
+          let categories
+          try {
+            categories = JSON.parse(t.categories)
+          } catch {}
+          if (categories) {
+            info.appendChild(document.createElement('br'))
+            const multiCat = document.createElement('div')
+            multiCat.id = 'searchMultiCat'
+            for (const id of categories) {
+              let name = categoryData.categories[id]
+              if (!name) {
+                await fetchCategoryData()
+                name = categoryData.categories[id]
+              }
+              if (name) {
+                const cat = document.createElement('a')
+                cat.className = 'mCat'
+                cat.dataset.mcatid = id
+                cat.textContent = name
+                multiCat.appendChild(cat)
+              }
+            }
+            info.appendChild(multiCat)
+          }
         }
 
         {
