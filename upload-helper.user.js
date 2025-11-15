@@ -1264,7 +1264,17 @@
           value,
         ])
 
+    const titleCheckUrl = new URL(
+      'https://titlecaseconverter.com/?showExplanations=1&keepAllCaps=1&multiLine=0&highlightChanges=1&convertOnPaste=1&straightQuotes=1',
     )
+    {
+      const isEnglish = +languageId === 1 || language === 'English'
+      const params = new URLSearchParams(titleCheckUrl.search)
+      params.append('style', isEnglish ? 'MLA' : 'SC')
+      params.append('title', title.replaceAll('%', ''))
+      titleCheckUrl.search = params
+    }
+
     const errors = [
       !posterUrl && 'Missing poster',
       !title && 'Missing title',
@@ -1338,7 +1348,7 @@
   <div id="posterHolder" style="width: 302px; height: 302px">&nbsp;</div>
   <img id="torDetPoster" src="${posterUrl}" class="torDetPoster" />
   <div class="torDetRow torDetRowFirst">
-    <div class="torDetLeft">Title</div>
+    <div class="torDetLeft">Title <a href="${titleCheckUrl}" target=titlecaseconverter>[check]</a></div>
     <div class="torDetRight">
       <span class="flex"><span class="TorrentTitle">${title}</span></span>
     </div>
