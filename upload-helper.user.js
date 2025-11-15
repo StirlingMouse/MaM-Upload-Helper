@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MaM Upload Helper
 // @namespace    Violentmonkey Scripts
-// @version      0.4.0
+// @version      0.4.1
 // @description  Adds other torrents, preview, check for creating new entities and more to the upload page
 // @author       Stirling Mouse
 // @match        https://www.myanonamouse.net/tor/upload.php
@@ -1618,9 +1618,15 @@
       }
 
       for (const torrent of body.data) {
+        const expire_date = torrent.vip_expire
+          ? new Date(torrent.vip_expire * 1000)
+          : undefined
+        const days = expire_date
+          ? Math.floor((expire_date - Date.now()) / 1000 / 60 / 60 / 24)
+          : 0
         if (
           torrent.mediatype === +mediaTypeId &&
-          (!!vip !== !!torrent.vip || vip_days !== (torrent.vip_days ?? 0))
+          (!!vip !== !!torrent.vip || (!!vip && vip_days !== days))
         ) {
           warnings.push('Potential VIP mismatch')
           uploadErrors.innerHTML = renderErrors()
