@@ -1404,7 +1404,9 @@
           `Title might include a reading line, verify that it is correct`,
         )
       }
-      if (readingLineText?.match(/(A\s+.*\s+(Prequel))|(Series)$/i)) {
+      if (
+        readingLineText?.match(/(A\s+.*\s+(Prequel|Standalone))|(Series)$/i)
+      ) {
         warnings.push(
           `Title might include a series name, verify that it is correct`,
         )
