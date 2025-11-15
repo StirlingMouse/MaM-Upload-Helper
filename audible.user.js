@@ -408,7 +408,6 @@ if (
     }
     navigator.clipboard.writeText(text).then(
       () => {
-        // window.open("https://www.myanonamouse.net/tor/upload.php", "_blank");
         console.log('ok', text)
       },
       (err) => {
@@ -577,10 +576,9 @@ if (
     const titleElm =
       listItem.querySelector('.bc-heading a[href^="/pd/"]') ??
       listItem.querySelector('.bc-heading a[href^="/ac/"]')
-    const title = decodeHtml(listItem.getAttribute('aria-label')).replaceAll(
-      /&|(\band\b)/g,
-      '(&|and)',
-    )
+    const title = decodeHtml(listItem.getAttribute('aria-label'))
+      .replaceAll(/&|(\band\b)/g, '(&|and)')
+      .replaceAll(/[!()]/g, '')
     const authorElm =
       listItem.querySelector('a[href^="/author/"') ??
       listItem.querySelector('a[href^="/search?searchAuthor"')
