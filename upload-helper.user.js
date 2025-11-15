@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MaM Upload Helper
 // @namespace    Violentmonkey Scripts
-// @version      0.4.1
+// @version      0.4.2
 // @description  Adds other torrents, preview, check for creating new entities and more to the upload page
 // @author       Stirling Mouse
 // @match        https://www.myanonamouse.net/tor/upload.php
@@ -941,15 +941,8 @@
   async function acFieldSearch(target, value, type) {
     let el
     if (value) {
-      const results = await acSearch(value, type)
-      const name = value
-        .toLowerCase()
-        .replaceAll('.', ' ')
-        .replaceAll(/\s+/g, ' ')
-      const entity = results.find((e) => e.value.toLowerCase() === name)
+      const entity = await acExactSearch(value, type)
       if (entity) {
-        acCache[type][value] = entity.id
-        acCache[type][name] = entity.id
         el = document.createElement('a')
         el.target = '_blank'
         el.href = `https://www.myanonamouse.net/tor/browse.php?${type}=${entity.id}`
@@ -977,8 +970,54 @@
     }
   }
 
+  async function acExactSearch(term, type) {
+    const normalized = normalizeAc(term)
+    if (acCache[type]?.[normalized])
+      return { value: term, id: acCache[type][normalized] }
+    const results = await acSearch(term, type)
+    const result = results.find((e) => normalizeAc(e.value) === normalized)
+    if (result) return result
+
+    // The ac search does not always return an exact match in the result, fallback to a torrent search
+    const response = await fetch(
+      'https://www.myanonamouse.net/tor/js/loadSearchJSONbasic.php',
+      {
+        method: 'post',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          tor: {
+            text: `"${term}"`,
+            srchIn: {
+              [type]: 'true',
+            },
+          },
+        }),
+      },
+    )
+    const body = await response.json()
+    for (const torrent of body.data ?? []) {
+      let info
+      try {
+        info = JSON.parse(torrent[`${type}_info`])
+      } catch {}
+      if (info) {
+        for (let [id, name] of Object.entries(info)) {
+          if (Array.isArray(name)) name = name[0]
+          const normalizedName = normalizeAc(name)
+          acCache[type][normalizedName] = +id
+          if (normalizedName === normalized) {
+            return { value: name, id: +id }
+          }
+        }
+      }
+    }
+    return
+  }
+
   async function acSearch(term, type) {
-    if (acCache[type]?.[term]) return [{ value: term, id: acCache[type][term] }]
+    const normalized = normalizeAc(term)
+    if (acCache[type]?.[normalized])
+      return [{ value: term, id: acCache[type][normalized] }]
     const raw = await cookieStore.get('mam_id')
     const mamId = decodeURIComponent(raw.value)
     const body = new URLSearchParams()
@@ -997,9 +1036,21 @@
     })
     const json = await res.json()
     for (const entity of json) {
-      acCache[type][entity.value] = entity.id
+      acCache[type][normalizeAc(entity.value)] = entity.id
     }
     return json
+  }
+
+  function normalizeAc(name) {
+    return (
+      name
+        .normalize('NFD')
+        // https://en.wikipedia.org/wiki/Combining_Diacritical_Marks
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replaceAll('.', ' ')
+        .replaceAll(/\s+/g, ' ')
+    )
   }
 
   function jsonFill(json) {
@@ -1214,7 +1265,7 @@
         .getAll('tor[author][]')
         .filter(Boolean)
         .map(async (a) => ({
-          id: (await acSearch(a, 'author'))[0]?.id,
+          id: (await acExactSearch(a, 'author'))?.id,
           name: a,
         })),
     )
@@ -1222,8 +1273,8 @@
     data.forEach((value, key) => {
       if (key.startsWith('tor[series]') && key.endsWith('[name]')) {
         series.push(
-          acSearch(value, 'series').then((entities) => ({
-            id: entities[0]?.id,
+          acExactSearch(value, 'series').then((entity) => ({
+            id: entity?.id,
             name: value,
             number: data.get(key.replace('name', 'extra')),
           })),
@@ -1236,7 +1287,7 @@
         .getAll('tor[narrator][]')
         .filter(Boolean)
         .map(async (a) => ({
-          id: (await acSearch(a, 'narrator'))[0]?.id,
+          id: (await acExactSearch(a, 'narrator'))?.id,
           name: a,
         })),
     )
