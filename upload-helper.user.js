@@ -180,6 +180,11 @@
         max-height: 95vh;
         cursor: zoom-out;
       }
+      p.uploadError {
+        padding: 4px 8px;
+        color: var(--red-background-font-color);
+        background-color: var(--red-background);
+      }
     }
  `
   document.body.appendChild(styles)
@@ -1259,17 +1264,75 @@
           value,
         ])
 
-    const isValid = !!(
-      posterUrl &&
-      title &&
-      authors.length >= 1 &&
-      cat &&
-      mediaType &&
-      mainCat &&
-      categories.length >= 1 &&
-      tags &&
-      (mediaInfo || mediaType !== 'Audiobook')
     )
+    const errors = [
+      !posterUrl && 'Missing poster',
+      !title && 'Missing title',
+      authors.length === 0 && 'Missing authors',
+      !cat && 'Missing old category',
+      !mediaType && 'Missing media type',
+      !mainCat && 'Missing main category',
+      categories.length === 0 && 'Missing new categories',
+      !tags && 'Missing tags',
+      !(mediaInfo || mediaType !== 'Audiobook') && 'Missing media info',
+    ].filter(Boolean)
+    const warnings = []
+
+    {
+      const [, titleText, readingLineText] =
+        title.match(/(^.+)(?:[:꞉]\s+([^:]+))$/) ?? []
+      if (
+        readingLineText?.match(
+          /A\s+((Novel|Memoir)|.*\s+(Mystery|Novel|Novella))$/i,
+        )
+      ) {
+        warnings.push(
+          `Title might include a reading line, verify that it is correct`,
+        )
+      }
+      if (readingLineText?.match(/(A\s+.*\s+(Prequel))|(Series)$/i)) {
+        warnings.push(
+          `Title might include a series name, verify that it is correct`,
+        )
+      }
+    }
+    for (const author of authors) {
+      if (author.name.match(/[A-Z][A-Z]/)) {
+        warnings.push(
+          `Author initials should be split, verify that <i>${author.name}</i> is correct`,
+        )
+      }
+    }
+    for (const serie of series) {
+      if (
+        serie.name.match(/^(the|a) .* (book|novel|novella|series?)$/i) ||
+        serie.name.match(/(series)$/i)
+      ) {
+        warnings.push(
+          `Series look like it contains a reading line, verify that <i>${serie.name}</i> is correct`,
+        )
+      }
+    }
+    for (const narrator of narrators) {
+      if (narrator.name.match(/[A-Z][A-Z]/)) {
+        warnings.push(
+          `Narrator initials should be split, verify that <i>${narrator.name}</i> is correct`,
+        )
+      }
+    }
+    if (+mediaTypeId === 1 && narrators.length === 0) {
+      warnings.push(`Missing narrators`)
+    }
+    if (tags.match(/([,|])\s*$/) || tags.match(/^\s*([,|])/)) {
+      warnings.push(`Tags and Labels look incomplete`)
+    }
+
+    function renderErrors() {
+      return (
+        errors.map((error) => `<p class=uploadError>${error}</p>`).join('') +
+        warnings.map((error) => `<p class=uploadError>${error}</p>`).join('')
+      )
+    }
 
     div.innerHTML = `<div id="torDetMainCon">
   <div id="posterHolder" style="width: 302px; height: 302px">&nbsp;</div>
@@ -1429,12 +1492,14 @@
     }
     </div>
   </div>
-  ${isValid ? `<input type="submit" form="uploadFormForm" value="Upload Torrent">` : ''}
+  <div class=uploadErrors>${renderErrors()}</div>
+  ${errors.length === 0 ? `<input type="submit" form="uploadFormForm" value="Upload Torrent">` : ''}
 </div>
 `
 
     form.id = 'uploadFormForm'
     div.querySelector('#torDesc').innerHTML = description
+    const uploadErrors = div.querySelector('.uploadErrors')
     const otherTorrentsTable = div.querySelector(
       '.otherTorrents-container table',
     )
@@ -1487,6 +1552,16 @@
           console.log('MaM Other Torrents response', body)
         }
         if (!body.data) return
+      }
+
+      for (const torrent of body.data) {
+        if (
+          torrent.mediatype === +mediaTypeId &&
+          (!!vip !== !!torrent.vip || vip_days !== (torrent.vip_days ?? 0))
+        ) {
+          warnings.push('Potential VIP mismatch')
+          uploadErrors.innerHTML = renderErrors()
+        }
       }
 
       addOtherTorrents(otherTorrentsTable, body, false)
