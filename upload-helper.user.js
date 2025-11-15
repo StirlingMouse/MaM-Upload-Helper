@@ -32,6 +32,7 @@
   const files = Array.from(uploadForm.querySelectorAll('tr')).find(
     (tr) => tr.firstElementChild?.textContent === 'Files',
   )
+  if (!files) return
   const firstFile = files?.querySelector('tr td.row2')?.textContent
   const title = firstFile
     ?.replace(/[[\-.].*/, '')
@@ -227,7 +228,7 @@
     authors.addEventListener('input', callback)
   }
 
-  if (files) {
+  {
     const filesTable = files.querySelector('table')
     const a = document.createElement('a')
     a.href = `https://www.goodreads.com/search?q=${encodeURIComponent(fullTitle)}`
@@ -240,7 +241,7 @@
     })
   }
 
-  if (files) {
+  {
     const filesTable = files.querySelector('table')
     const a = document.createElement('a')
     a.href =
@@ -258,15 +259,28 @@
     })
   }
 
-  if (files) {
+  {
     const filesTable = files.querySelector('table')
     const a = document.createElement('a')
     a.href = `https://www.romance.io/search?q=${encodeURIComponent(fullTitle)}`
     a.target = 'romance.io'
     a.textContent = 'romance.io'
+    a.style = 'margin-right: 20px;'
     filesTable.parentElement.appendChild(a)
     onQueryChanged(() => {
       a.href = `https://www.romance.io/search?q=${encodeURIComponent(getSearchQuery((name) => name.replaceAll(/([A-Z])\s([A-Z])\s/g, '$1.$2. ')))}`
+    })
+  }
+
+  {
+    const filesTable = files.querySelector('table')
+    const a = document.createElement('a')
+    a.href = `https://www.startpage.com/sp/search?q=${encodeURIComponent(fullTitle)}`
+    a.target = 'startpage.com'
+    a.textContent = 'Web'
+    filesTable.parentElement.appendChild(a)
+    onQueryChanged(() => {
+      a.href = `https://www.startpage.com/sp/search?q=${encodeURIComponent(getSearchQuery())}`
     })
   }
 
@@ -281,7 +295,7 @@
     const fillJsonFile = fillRow.querySelector('input[type="file"]')
     const fillJsonText = fillRow.querySelector('input[type="text"]')
 
-    uploadForm.insertBefore(fillRow, files.nextElementSibling)
+    files.after(fillRow)
     fillJsonFile.addEventListener('change', () => {
       if (fillJsonFile.files.length === 1) {
         fillJsonText.value = ''
