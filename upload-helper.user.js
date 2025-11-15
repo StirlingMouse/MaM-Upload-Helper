@@ -538,7 +538,7 @@
           thumbnail: true,
           description: true,
           tor: {
-            text: query,
+            text: query.replaceAll("'", ' '),
             srchIn: {
               title: 'true',
               author: includeAuthor ? 'true' : undefined,
