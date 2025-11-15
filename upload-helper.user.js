@@ -361,15 +361,19 @@
     if (seriesTd.firstChild.tagName === 'BR') seriesTd.firstChild.remove()
   }
 
+  function autoCategoriesEnabled() {
+    return localStorage.getItem('uploadFormHelper::autoCategories') === 'true'
+  }
+
   // Tags
   {
     const a = document.createElement('a')
     a.href = `#`
-    a.textContent = 'Cleanup'
-    a.style = 'margin-left: 20px'
+    a.textContent = '[cleanup]'
+    a.style = 'margin-left: 20px;margin-right: 20px;'
     a.addEventListener('click', (e) => {
       e.preventDefault()
-      const input = tags.querySelector('input')
+      const input = tags.querySelector('input[name="tor[tags]"]')
       const tagsStart = input.value.lastIndexOf(' | ')
       console.log('tags', input.value.slice(tagsStart + 3))
 
@@ -385,6 +389,7 @@
         'Audiobook',
         'Literature',
         'Book Club',
+        'Contemporary Romance',
       ]
       const mapTags = {
         'Autistic Spectrum Disorder': ['Autistic Spectrum Disorder', 'ASD'],
@@ -401,6 +406,19 @@
     })
     const br = tags.querySelector('br')
     br.parentElement.insertBefore(a, br)
+    const autoCategories = document.createElement('label')
+    autoCategories.innerHTML = `Autoupdate categories from tags: <input type=checkbox ${autoCategoriesEnabled() ? 'checked' : ''}>`
+    autoCategories.querySelector('input').addEventListener('change', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (e.currentTarget.checked) {
+        localStorage.setItem('uploadFormHelper::autoCategories', 'true')
+      } else {
+        localStorage.removeItem('uploadFormHelper::autoCategories')
+      }
+    })
+    a.after(autoCategories)
+    a.after(document.createTextNode(' '))
   }
   // More tags
   {
@@ -433,11 +451,14 @@
       'Urban Fantasy': 53,
       Western: 54,
       YA: 55,
+      'New Adult': 55,
       'Young Adult': 55,
       'Coming Of Age': 55,
       'Literary Fiction': 57,
     }
     tags?.addEventListener('input', () => {
+      if (!autoCategoriesEnabled()) return
+
       const text = tags.value
       if (
         text.includes('LGBT') ||
