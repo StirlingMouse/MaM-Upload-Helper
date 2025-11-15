@@ -299,6 +299,26 @@
     })
   }
 
+  // Title
+  {
+    const titleElm = document.querySelector('input[name="tor[title]"]')
+
+    const readingLine = document.createElement('a')
+    readingLine.textContent = '[cut reading line]'
+    readingLine.href = '#'
+    readingLine.onclick = (e) => {
+      e.preventDefault()
+      const [, titleText, readingLineText] =
+        titleElm.value.match(/(^.+)(?:[:꞉]\s+([^:]+))$/) ?? []
+      if (!titleText) return
+      titleElm.value = titleText
+      navigator.clipboard.writeText(readingLineText)
+    }
+    titleElm.after(readingLine)
+    titleElm.after(document.createTextNode(' '))
+    readingLine.after(document.createElement('br'))
+  }
+
   // Categories
   {
     const catTd = uploadForm.querySelector(
