@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MaM Upload Helper
 // @namespace    Violentmonkey Scripts
-// @version      0.3.2
+// @version      0.4.0
 // @description  Adds other torrents, preview, check for creating new entities and more to the upload page
 // @author       Stirling Mouse
 // @match        https://www.myanonamouse.net/tor/upload.php
@@ -496,6 +496,24 @@
         }
       }
     })
+  }
+
+  // Description
+  {
+    const a = document.createElement('a')
+    a.href = `#`
+    a.textContent = 'space paragraphs'
+    a.addEventListener('click', (e) => {
+      e.preventDefault()
+      tinyMCE.activeEditor.setContent(
+        tinyMCE.activeEditor
+          .getContent()
+          .replaceAll(/<\/p>\s*<p>/gi, '</p><br><p>'),
+      )
+    })
+    const td = uploadForm.querySelector('tr:has(>td#description) td')
+    td.append(document.createElement('br'))
+    td.append(a)
   }
 
   // Poster
@@ -1324,7 +1342,7 @@
     const warnings = []
 
     {
-      const [, titleText, readingLineText] =
+      const [, _titleText, readingLineText] =
         title.match(/(^.+)(?:[:꞉]\s+([^:]+))$/) ?? []
       if (
         readingLineText?.match(
