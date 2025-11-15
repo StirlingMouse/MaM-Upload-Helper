@@ -204,11 +204,11 @@
     filesTable.parentElement.appendChild(a)
   }
 
-  function getSearchQuery() {
+  function getSearchQuery(mapPerson = (name) => name) {
     const form = document.querySelector('form[action="/tor/upload.php"]')
     const data = new FormData(form)
     const title = data.get('tor[title]')
-    const authors = data.getAll('tor[author][]').filter(Boolean)
+    const authors = data.getAll('tor[author][]').filter(Boolean).map(mapPerson)
     const query =
       title && authors.length >= 1
         ? `${title.split(':')[0]} ${authors[0]}`
@@ -231,7 +231,7 @@
     a.style = 'margin-right: 20px;'
     filesTable.parentElement.appendChild(a)
     onQueryChanged(() => {
-      a.href = `https://www.goodreads.com/search?q=${encodeURIComponent(getSearchQuery())}`
+      a.href = `https://www.goodreads.com/search?q=${encodeURIComponent(getSearchQuery((name) => name.replaceAll(/([A-Z])\s([A-Z])\s/g, '$1.$2. ')))}`
     })
   }
 
@@ -239,7 +239,7 @@
     const filesTable = files.querySelector('table')
     const a = document.createElement('a')
     a.href =
-      `https://www.storytel.com/se/search/all?query=` +
+      `https://www.storytel.com/search/all?query=` +
       encodeURIComponent(fullTitle) +
       '&formats=abook%2Cebook'
     a.target = 'storytel'
@@ -247,7 +247,7 @@
     a.style = 'margin-right: 20px;'
     filesTable.parentElement.appendChild(a)
     onQueryChanged(() => {
-      a.href = `https://www.storytel.com/se/search/all?query=${encodeURIComponent(
+      a.href = `https://www.storytel.com/search/all?query=${encodeURIComponent(
         getSearchQuery(),
       )}&formats=abook%2Cebook`
     })
@@ -261,7 +261,7 @@
     a.textContent = 'romance.io'
     filesTable.parentElement.appendChild(a)
     onQueryChanged(() => {
-      a.href = `https://www.romance.io/search?q=${encodeURIComponent(getSearchQuery())}`
+      a.href = `https://www.romance.io/search?q=${encodeURIComponent(getSearchQuery((name) => name.replaceAll(/([A-Z])\s([A-Z])\s/g, '$1.$2. ')))}`
     })
   }
 
