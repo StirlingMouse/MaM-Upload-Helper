@@ -358,6 +358,7 @@
         .slice(tagsStart + 3)
         .replaceAll(/([a-z])([A-Z0-9])/g, '$1, $2')
         .replaceAll(/(LGBT)([A-Z])/g, '$1, $2')
+        .replaceAll(/(BDSM)([A-Z])/g, '$1, $2')
         .split(', ')
       const ignoreTags = [
         'Fiction',
@@ -414,6 +415,7 @@
       Western: 54,
       YA: 55,
       'Young Adult': 55,
+      'Coming Of Age': 55,
       'Literary Fiction': 57,
     }
     tags?.addEventListener('input', () => {
