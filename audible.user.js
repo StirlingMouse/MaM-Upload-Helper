@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         MAM Audible Upload
+// @name         MaM Audible Upload
 // @namespace    Violentmonkey Scripts
 // @version      0.1.0
 // @license      MIT
@@ -10,26 +10,31 @@
 // @include      https://www.audible.com/search*
 // @include      https://www.audible.com/author/*
 // @include      https://www.audible.com/narrator/*
+// @include      https://www.audible.com/series/*
 // @include      https://www.audible.in/pd/*
 // @include      https://www.audible.es/pd/*
 // @include      https://www.audible.es/ac/*
 // @include      https://www.audible.es/search*
 // @include      https://www.audible.es/author/*
 // @include      https://www.audible.es/narrator/*
+// @include      https://www.audible.es/series/*
 // @include      https://www.audible.it/pd/*
 // @include      https://www.audible.it/ac/*
 // @include      https://www.audible.it/search*
 // @include      https://www.audible.it/author/*
 // @include      https://www.audible.it/narrator/*
+// @include      https://www.audible.it/series/*
 // @include      https://www.audible.co.uk/pd/*
 // @include      https://www.audible.co.uk/ac/*
 // @include      https://www.audible.co.uk/search*
 // @include      https://www.audible.co.uk/author/*
 // @include      https://www.audible.co.uk/narrator/*
+// @include      https://www.audible.co.uk/series/*
 // @include      https://www.audible.com.au/pd/*
 // @include      https://www.audible.com.au/search*
 // @include      https://www.audible.com.au/author/*
 // @include      https://www.audible.com.au/narrator/*
+// @include      https://www.audible.com.au/series/*
 // @grant        none
 // @downloadURL	 https://github.com/StirlingMouse/MaM-Upload-Helper/raw/refs/heads/main/audible.user.js
 // @updateURL    https://github.com/StirlingMouse/MaM-Upload-Helper/raw/refs/heads/main/audible.user.js
@@ -577,8 +582,8 @@ if (
       listItem.querySelector('.bc-heading a[href^="/pd/"]') ??
       listItem.querySelector('.bc-heading a[href^="/ac/"]')
     const title = decodeHtml(listItem.getAttribute('aria-label'))
-      .replaceAll(/&|(\band\b)/g, '(&|and)')
       .replaceAll(/[!()]/g, '')
+      .replaceAll(/&|(\band\b)/g, '(&|and)')
     const authorElm =
       listItem.querySelector('a[href^="/author/"') ??
       listItem.querySelector('a[href^="/search?searchAuthor"')
