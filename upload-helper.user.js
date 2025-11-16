@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MaM Upload Helper
 // @namespace    Violentmonkey Scripts
-// @version      0.4.2
+// @version      0.5.0
 // @description  Adds other torrents, preview, check for creating new entities and more to the upload page
 // @author       Stirling Mouse
 // @match        https://www.myanonamouse.net/tor/upload.php
@@ -15,7 +15,7 @@
 // @updateURL    https://github.com/StirlingMouse/MaM-Upload-Helper/raw/refs/heads/main/upload-helper.user.js
 // ==/UserScript==
 
-;(async () => {
+;(async function uploadHelpers() {
   const acCache = {
     author: {},
     series: {},
@@ -32,7 +32,76 @@
   const files = Array.from(uploadForm.querySelectorAll('tr')).find(
     (tr) => tr.firstElementChild?.textContent === 'Files',
   )
-  if (!files) return
+  if (!files) {
+    // On first step
+    const torrentInput = document.querySelector(
+      'input[type="file"][name="torrent"]',
+    )
+    torrentInput.setAttribute(
+      'accept',
+      'application/x-bittorrent,.torrent,application/json,.json,image/*,.jpg,.jpeg,.png,.webp',
+    )
+    torrentInput.setAttribute('multiple', '')
+
+    torrentInput.addEventListener('change', async () => {
+      if (torrentInput.files.length > 1) {
+        const files = Array.from(torrentInput.files)
+        const posterFile = files.find((file) => file.type.startsWith('image/'))
+        const jsonFile = files.find(
+          (file) =>
+            file.name.endsWith('.json') || file.type === 'application/json',
+        )
+        const torrentFile = files.find((file) => file.name.endsWith('.torrent'))
+        if (!torrentFile) return
+        const dataTransfer = new DataTransfer()
+        dataTransfer.items.add(torrentFile)
+        torrentInput.files = dataTransfer.files
+        if (!jsonFile) return
+        const data = new FormData(torrentInput.form)
+        const response = await fetch('/tor/upload.php', {
+          method: 'post',
+          body: data,
+        })
+        const html = await response.text()
+        const parser = new DOMParser()
+        const uploadPage = parser.parseFromString(html, 'text/html')
+        const scripts = uploadPage.querySelectorAll('#mainBody script')
+        const newMainBody = uploadPage.querySelector('#mainBody')
+        const mainBody = document.querySelector('#mainBody')
+        mainBody.innerHTML = newMainBody.innerHTML
+        for (const script of scripts) {
+          const newScript = document.createElement('script')
+          newScript.src = script.src
+          const loaded = new Promise((resolve) => {
+            newScript.onload = resolve
+          })
+          mainBody.append(newScript)
+          await loaded
+        }
+        initializeItAll()
+        uploadHelpers()
+        if (posterFile) {
+          const posterInput = document.querySelector(
+            'input[type="file"][name="poster"]',
+          )
+          const dataTransfer = new DataTransfer()
+          dataTransfer.items.add(posterFile)
+          posterInput.files = dataTransfer.files
+          posterInput.dispatchEvent(new Event('change', { bubbles: true }))
+        }
+        if (jsonFile) {
+          const jsonInput = document.querySelector(
+            '.jsonFill input[type="file"]',
+          )
+          const dataTransfer = new DataTransfer()
+          dataTransfer.items.add(jsonFile)
+          jsonInput.files = dataTransfer.files
+          jsonInput.dispatchEvent(new Event('change', { bubbles: true }))
+        }
+      }
+    })
+    return
+  }
   const firstFile = files?.querySelector('tr td.row2')?.textContent
   const title = firstFile
     ?.replace(/[[\-.].*/, '')
@@ -291,7 +360,7 @@
     const fillRow = document.createElement('tr')
     fillRow.className = 'torDetRow'
     fillRow.innerHTML =
-      '<td class="row1">Fast Fill</td><td class="row1"><input type=file><br><input type=text></div>'
+      '<td class="row1">Fast Fill</td><td class="row1 jsonFill"><input type=file><br><input type=text></div>'
     const fillJsonFile = fillRow.querySelector('input[type="file"]')
     const fillJsonText = fillRow.querySelector('input[type="text"]')
 
@@ -375,7 +444,6 @@
       e.preventDefault()
       const input = tags.querySelector('input[name="tor[tags]"]')
       const tagsStart = input.value.lastIndexOf(' | ')
-      console.log('tags', input.value.slice(tagsStart + 3))
 
       let tagValues = input.value
         .slice(tagsStart + 3)
@@ -703,7 +771,7 @@
           for (const [id, name] of Object.entries(authorInfo)) {
             if (clone) author = cloneAndInsert(author)
             clone = true
-            author.textContent = name
+            author.textContent = decodeHtml(name)
             author.href = `/tor/browse.php?author=${id}&amp;tor%5Bcat%5D%5B%5D=0`
           }
         } catch {}
@@ -715,7 +783,7 @@
             for (const [id, name] of Object.entries(narratorInfo)) {
               if (clone) narrator = cloneAndInsert(narrator)
               clone = true
-              narrator.textContent = name
+              narrator.textContent = decodeHtml(name)
               narrator.href = `/tor/browse.php?narrator=${id}&amp;tor%5Bcat%5D%5B%5D=0`
             }
           } catch {}
@@ -1103,9 +1171,10 @@
       fillEntities('#tdNar', json.narrators, 'narrator')
     }
     if (json.description) {
-      // uploadForm.querySelector('input[name="tor[description]"]').value = json.description;
+      uploadForm.querySelector('textarea[name="tor[description]"]').value =
+        json.description
       try {
-        $unsafeWindow.tinyMCE.activeEditor.setContent(json.description)
+        tinyMCE.activeEditor.setContent(json.description)
       } catch (e) {
         console.error('description failed', e)
       }
@@ -1161,6 +1230,7 @@
       const input = uploadForm.querySelector(`input[${name}][value="${value}"]`)
       if (input) input.checked = true
     } else {
+      if (name === 'LGBT') name = 'LGBTQIA+'
       value = value.toLowerCase().replaceAll(/[^a-z/ -]/g, '')
       const input = Array.from(
         uploadForm.querySelectorAll(`input[${name}]`),
