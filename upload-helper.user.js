@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MaM Upload Helper
 // @namespace    Violentmonkey Scripts
-// @version      0.5.0
+// @version      0.5.1
 // @description  Adds other torrents, preview, check for creating new entities and more to the upload page
 // @author       Stirling Mouse
 // @match        https://www.myanonamouse.net/tor/upload.php
@@ -1093,20 +1093,29 @@
     body.append('type', type)
     body.append('mam_id', mamId)
 
-    const res = await fetch('https://cdn.myanonamouse.net/json/ac_names.php', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json, text/javascript, */*; q=0.01',
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      },
-      body,
-      credentials: 'include',
-    })
-    const json = await res.json()
-    for (const entity of json) {
-      acCache[type][normalizeAc(entity.value)] = entity.id
+    // The server returns an error if term has & in it
+    try {
+      const res = await fetch(
+        'https://cdn.myanonamouse.net/json/ac_names.php',
+        {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json, text/javascript, */*; q=0.01',
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          },
+          body,
+          credentials: 'include',
+        },
+      )
+      const json = await res.json()
+      for (const entity of json) {
+        acCache[type][normalizeAc(entity.value)] = entity.id
+      }
+      return json
+    } catch (error) {
+      console.error(`Error when searching for entity ${term}`, error)
+      return []
     }
-    return json
   }
 
   function normalizeAc(name) {
