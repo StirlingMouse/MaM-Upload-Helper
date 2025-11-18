@@ -465,6 +465,7 @@
         'Lesbian Fiction': ['Lesbian', 'Sapphic'],
         Lesbian: ['Lesbian', 'Sapphic'],
         'M M Romance': ['MM', 'Gay'],
+        'Fantasy Romance': 'Romantasy',
       }
       tagValues = tagValues
         .filter((tag) => !ignoreTags.includes(tag))
@@ -1476,7 +1477,7 @@
         title.match(/(^.+)(?:[:꞉]\s+([^:]+))$/) ?? []
       if (
         readingLineText?.match(
-          /A\s+((Novel|Memoir)|.*\s+(Mystery|Novel|Novella))$/i,
+          /A\s+((Novel|Memoir)|.*\s+(Mystery|Novel|Novella|Fantasy(\s+Adventure)?|Romance))$/i,
         )
       ) {
         warnings.push(
@@ -1500,7 +1501,7 @@
     }
     for (const serie of series) {
       if (
-        serie.name.match(/^(the|a) .* (book|novel|novella|series?)$/i) ||
+        serie.name.match(/^(the|a) .* (book|novel|novella|series?|saga)$/i) ||
         serie.name.match(/(series)$/i)
       ) {
         warnings.push(
