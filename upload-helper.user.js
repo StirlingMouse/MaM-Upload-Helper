@@ -665,7 +665,7 @@
           thumbnail: true,
           description: true,
           tor: {
-            text: query.replaceAll("'", ' '),
+            text: prepareQuery(query),
             srchIn: {
               title: 'true',
               author: includeAuthor ? 'true' : undefined,
@@ -950,6 +950,16 @@
       table.innerHTML =
         '<tr><td>No other torrents from any of the authors with a matching title were found</td></tr>'
     }
+  }
+
+  function prepareQuery(query) {
+    return query
+      .replaceAll(/([*?])/g, '"$1"')
+      .replaceAll(/(['`/]| - )/g, ' ')
+      .replaceAll(/&|\band\b/g, '(&|and)')
+      .replaceAll('!', '')
+      .replaceAll(/\s+[([][^)\]]+[)\]]/g, '')
+      .trim()
   }
 
   {
@@ -1713,7 +1723,7 @@
           body: JSON.stringify({
             thumbnail: true,
             tor: {
-              text: `${title} (${authorsQuery})`,
+              text: `${prepareQuery(title)} (${authorsQuery})`,
               srchIn: {
                 title: 'true',
                 author: 'true',
@@ -1735,7 +1745,7 @@
               body: JSON.stringify({
                 thumbnail: true,
                 tor: {
-                  text: `${shortTitle} (${authorsQuery})`,
+                  text: `${prepareQuery(shortTitle)} (${authorsQuery})`,
                   srchIn: {
                     title: 'true',
                     author: 'true',
