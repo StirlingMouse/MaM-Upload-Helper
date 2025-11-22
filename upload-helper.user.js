@@ -455,6 +455,7 @@
         'Fiction',
         'Nonfiction',
         'Audiobook',
+        'Ebooks',
         'Literature',
         'Book Club',
         'Contemporary Romance',
@@ -873,6 +874,19 @@
             linksHTML += `<a id="clone${t.id}" title="Clone" role=button><img src="https://cdn.myanonamouse.net/pic/pencil.png"></a>`
           }
           links.innerHTML = linksHTML
+          if (uploadHelpers) {
+            if (!t.vip) {
+              const img = links.querySelector(
+                'img[src="https://cdn.myanonamouse.net/pic/vip.png"]',
+              )
+              img.style.filter = 'saturate(30%)'
+            } else if (t.vip_expire) {
+              const img = links.querySelector(
+                'img[src="https://cdn.myanonamouse.net/pic/vip.png"]',
+              )
+              img.src = 'https://cdn.myanonamouse.net/pic/vip_temp.png'
+            }
+          }
 
           links
             .querySelector(`#torDeBookmark${t.id}`)
@@ -1790,6 +1804,7 @@
         ) {
           warnings.push('Potential VIP mismatch')
           uploadErrors.innerHTML = renderErrors()
+          break
         }
       }
 
