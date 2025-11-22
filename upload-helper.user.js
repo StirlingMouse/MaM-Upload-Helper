@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MaM Upload Helper
 // @namespace    Violentmonkey Scripts
-// @version      0.5.1
+// @version      0.6.0
 // @description  Adds other torrents, preview, check for creating new entities and more to the upload page
 // @author       Stirling Mouse
 // @match        https://www.myanonamouse.net/tor/upload.php
@@ -1533,28 +1533,41 @@
         )
       }
     }
-    for (const author of authors) {
-      if (author.name.match(/[A-Z][A-Z]/)) {
-        warnings.push(
-          `Author initials should be split, verify that <i>${author.name}</i> is correct`,
-        )
+    {
+      const authorTitles =
+        /\b((Dr|Col) )|( (PhD|LPC-S|ACS|ACN|MD|PAC|Ed.D.|Ph. ?D|PsyD)\b)/gi
+
+      for (const author of authors) {
+        if (author.name.match(authorTitles)) {
+          warnings.push(
+            `Author name should not contain honorifics, verify that <i>${author.name}</i> is correct`,
+          )
+        } else if (author.name.match(/[A-Z][A-Z]/)) {
+          warnings.push(
+            `Author initials should be split, verify that <i>${author.name}</i> is correct`,
+          )
+        }
       }
-    }
-    for (const serie of series) {
-      if (
-        serie.name.match(/^(the|a) .* (book|novel|novella|series?|saga)$/i) ||
-        serie.name.match(/(series)$/i)
-      ) {
-        warnings.push(
-          `Series look like it contains a reading line, verify that <i>${serie.name}</i> is correct`,
-        )
+      for (const serie of series) {
+        if (
+          serie.name.match(/^(the|a) .* (book|novel|novella|series?|saga)$/i) ||
+          serie.name.match(/(series)$/i)
+        ) {
+          warnings.push(
+            `Series look like it contains a reading line, verify that <i>${serie.name}</i> is correct`,
+          )
+        }
       }
-    }
-    for (const narrator of narrators) {
-      if (narrator.name.match(/[A-Z][A-Z]/)) {
-        warnings.push(
-          `Narrator initials should be split, verify that <i>${narrator.name}</i> is correct`,
-        )
+      for (const narrator of narrators) {
+        if (narrator.name.match(authorTitles)) {
+          warnings.push(
+            `Narrator name should not contain honorifics, verify that <i>${author.name}</i> is correct`,
+          )
+        } else if (narrator.name.match(/[A-Z][A-Z]/)) {
+          warnings.push(
+            `Narrator initials should be split, verify that <i>${narrator.name}</i> is correct`,
+          )
+        }
       }
     }
     if (+mediaTypeId === 1 && narrators.length === 0) {
