@@ -5,7 +5,7 @@
 // @match       https://www.myanonamouse.net/t/*
 // @match       https://www.myanonamouse.net/tor/browse.php*
 // @grant       none
-// @version     0.1.2
+// @version     0.1.3
 // @author      Stirling Mouse
 // @downloadURL https://github.com/StirlingMouse/MaM-Upload-Helper/raw/refs/heads/main/backfill-helper.user.js
 // @updateURL   https://github.com/StirlingMouse/MaM-Upload-Helper/raw/refs/heads/main/backfill-helper.user.js
@@ -161,13 +161,18 @@
       media_types: Object.fromEntries(
         Object.values(json.media_types).map((c) => [c.id, c.name]),
       ),
+      date: new Date().toISOString(),
     }
     localStorage.setItem(
       'backfillHelper::categoryData',
       JSON.stringify(categoryData),
     )
   }
-  if (!categoryData) await fetchCategoryData()
+  if (
+    !categoryData?.date ||
+    Date.now() - new Date(categoryData.date).getTime() > 1000 * 60 * 60 * 24
+  )
+    await fetchCategoryData()
 
   let currentBatch
   try {
@@ -304,6 +309,7 @@
     <div>
       <div id="showAllCats"><label>Show all <input type="checkbox" checked></label></div>
       ${Object.entries(categoryData.categories)
+        .sort((a, b) => (a[1] === b[1] ? 0 : a[1] < b[1] ? -1 : 1))
         .map(
           ([id, c]) =>
             `<label class="category"><input name="tor[categories][]" style="display:none" type="checkbox" value="${id}"><div>${c}</div></label>`,
