@@ -629,7 +629,10 @@
   // Other torrents with search
   let otherTorrentsSearchTable
   let otherTorrentsSearchQuery
+  let otherTorrentsLastSearchQuery
   let otherTorrentsResearchOnFill = false
+  let searchCount = 0
+  let alternativeSearch
   {
     const otherRow = document.createElement('tr')
     otherRow.className = 'torDetRow'
@@ -642,19 +645,21 @@
     otherTorrentsSearchTable = otherRow.querySelector('table')
 
     otherTorrentsSearchQuery = otherRow.querySelector('#otherTorrents-query')
-    let lastQuery = title
-    otherTorrentsSearchQuery.value = lastQuery
+    otherTorrentsLastSearchQuery = title
+    otherTorrentsSearchQuery.value = title
     otherTorrentsSearchQuery.addEventListener('blur', (e) => {
-      if (e.currentTarget.value !== lastQuery) {
-        lastQuery = e.currentTarget.value
+      if (e.currentTarget.value !== otherTorrentsLastSearchQuery) {
+        otherTorrentsLastSearchQuery = e.currentTarget.value
 
-        searchTorrents(lastQuery, true)
+        searchTorrents(otherTorrentsLastSearchQuery, true)
       }
     })
-    searchTorrents(lastQuery)
+    searchTorrents(otherTorrentsLastSearchQuery)
   }
 
   async function searchTorrents(query, includeAuthor = false) {
+    searchCount += 1
+    otherTorrentsLastSearchQuery = query
     otherTorrentsSearchQuery.value = query
     const response = await fetch(
       'https://www.myanonamouse.net/tor/js/loadSearchJSONbasic.php',
@@ -676,6 +681,13 @@
     )
     const body = await response.json()
     otherTorrentsResearchOnFill = body.data?.length > 10
+    if (otherTorrentsResearchOnFill && searchCount <= 1 && alternativeSearch) {
+      otherTorrentsResearchOnFill = false
+      const query = alternativeSearch
+      alternativeSearch = undefined
+      await searchTorrents(query, true)
+      return
+    }
     console.log('MaM Upload Helper response', body)
     await addOtherTorrents(otherTorrentsSearchTable, body)
   }
@@ -1228,8 +1240,13 @@
         json.mediaInfo
     }
 
-    if (otherTorrentsResearchOnFill && json.title && json.authors?.[0]) {
-      searchTorrents(`${json.title} ${json.authors[0]}`, true)
+    if (json.title && json.authors?.[0]) {
+      if (otherTorrentsResearchOnFill) {
+        alternativeSearch = undefined
+        searchTorrents(`${json.title} ${json.authors[0]}`, true)
+      } else {
+        alternativeSearch = `${json.title} ${json.authors[0]}`
+      }
     }
     otherTorrentsSearchQuery?.focus()
     if (
