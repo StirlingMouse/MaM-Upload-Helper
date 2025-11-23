@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MaM Upload Helper
 // @namespace    Violentmonkey Scripts
-// @version      0.6.0
+// @version      0.6.1
 // @description  Adds other torrents, preview, check for creating new entities and more to the upload page
 // @author       Stirling Mouse
 // @match        https://www.myanonamouse.net/tor/upload.php
@@ -1535,11 +1535,11 @@
       }
     }
     {
-      const authorTitles =
-        /\b((Dr|Col) )|( (PhD|LPC-S|ACS|ACN|MD|PAC|Ed.D.|Ph. ?D|PsyD)\b)/gi
+      const honorifics =
+        /\b((Dr|Col|Sir) )|( (PhD|LPC-S|ACS|ACN|MD|PAC|Ed.D.|Ph. ?D|PsyD)\b|( M D)$)/gi
 
       for (const author of authors) {
-        if (author.name.match(authorTitles)) {
+        if (author.name.match(honorifics)) {
           warnings.push(
             `Author name should not contain honorifics, verify that <i>${author.name}</i> is correct`,
           )
@@ -1560,7 +1560,7 @@
         }
       }
       for (const narrator of narrators) {
-        if (narrator.name.match(authorTitles)) {
+        if (narrator.name.match(honorifics)) {
           warnings.push(
             `Narrator name should not contain honorifics, verify that <i>${author.name}</i> is correct`,
           )
