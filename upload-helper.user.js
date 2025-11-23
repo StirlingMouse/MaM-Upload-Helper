@@ -1108,6 +1108,7 @@
       if (info) {
         for (let [id, name] of Object.entries(info)) {
           if (Array.isArray(name)) name = name[0]
+          name = decodeHtml(name)
           const normalizedName = normalizeAc(name)
           acCache[type][normalizedName] = +id
           if (normalizedName === normalized) {
