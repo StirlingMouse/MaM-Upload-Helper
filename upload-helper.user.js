@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MaM Upload Helper
 // @namespace    Violentmonkey Scripts
-// @version      0.6.1
+// @version      0.6.2
 // @description  Adds other torrents, preview, check for creating new entities and more to the upload page
 // @author       Stirling Mouse
 // @match        https://www.myanonamouse.net/tor/upload.php
@@ -525,6 +525,7 @@
       'Young Adult': 55,
       'Coming Of Age': 55,
       'Literary Fiction': 57,
+      Contemporary: 59,
     }
     tags?.addEventListener('input', () => {
       if (!autoCategoriesEnabled()) return
@@ -789,36 +790,46 @@
             author.href = `/tor/browse.php?author=${id}&amp;tor%5Bcat%5D%5B%5D=0`
           }
         } catch {}
-        let narratorInfo
-        if (t.narrator_info) {
-          try {
-            narratorInfo = JSON.parse(t.narrator_info)
-            let clone = false
-            for (const [id, name] of Object.entries(narratorInfo)) {
-              if (clone) narrator = cloneAndInsert(narrator)
-              clone = true
-              narrator.textContent = decodeHtml(name)
-              narrator.href = `/tor/browse.php?narrator=${id}&amp;tor%5Bcat%5D%5B%5D=0`
-            }
-          } catch {}
-        } else {
+        let hasNarrators = false
+        {
+          let narratorInfo
+          if (t.narrator_info) {
+            try {
+              narratorInfo = JSON.parse(t.narrator_info)
+              let clone = false
+              for (const [id, name] of Object.entries(narratorInfo)) {
+                hasNarrators = true
+                if (clone) narrator = cloneAndInsert(narrator)
+                clone = true
+                narrator.textContent = decodeHtml(name)
+                narrator.href = `/tor/browse.php?narrator=${id}&amp;tor%5Bcat%5D%5B%5D=0`
+              }
+            } catch {}
+          }
+        }
+        if (!hasNarrators) {
           row.querySelector('.torNarrator').nextSibling.remove()
           row.querySelector('.torNarrator').remove()
         }
-        let seriesInfo
-        if (t.series_info) {
-          try {
-            seriesInfo = JSON.parse(t.series_info)
-            let clone = false
-            for (const [id, [name, num]] of Object.entries(seriesInfo)) {
-              if (clone) series = cloneAndInsert(series)
-              clone = true
-              series.textContent = `${decodeHtml(name)} (#${num})`
-              series.href = `/tor/browse.php?series=${id}&amp;tor%5Bcat%5D%5B%5D=0`
-            }
-          } catch {}
-        } else {
-          if (t.narrator_info) {
+        let hasSeries = true
+        {
+          let seriesInfo
+          if (t.series_info) {
+            try {
+              seriesInfo = JSON.parse(t.series_info)
+              let clone = false
+              for (const [id, [name, num]] of Object.entries(seriesInfo)) {
+                hasSeries = false
+                if (clone) series = cloneAndInsert(series)
+                clone = true
+                series.textContent = `${decodeHtml(name)} (#${num})`
+                series.href = `/tor/browse.php?series=${id}&amp;tor%5Bcat%5D%5B%5D=0`
+              }
+            } catch {}
+          }
+        }
+        if (!hasSeries) {
+          if (hasNarrators) {
             row.querySelector('.torNarrator').nextSibling.remove()
           } else {
             row.querySelector('.series_info').nextSibling.remove()
@@ -840,7 +851,7 @@
           try {
             categories = JSON.parse(t.categories)
           } catch {}
-          if (categories) {
+          if (categories?.length) {
             info.appendChild(document.createElement('br'))
             const multiCat = document.createElement('div')
             multiCat.id = 'searchMultiCat'
@@ -1536,7 +1547,7 @@
     }
     {
       const honorifics =
-        /\b((Dr|Col|Sir) )|( (PhD|LPC-S|ACS|ACN|MD|PAC|Ed.D.|Ph. ?D|PsyD)\b|( M D)$)/gi
+        /\b((^IM|Dr|Col|Sir) )|( (PhD|LPC-S|ACS|ACN|MD|PAC|Ed.D.|Ph. ?D|PsyD)\b|( M D)$)/gi
 
       for (const author of authors) {
         if (author.name.match(honorifics)) {
