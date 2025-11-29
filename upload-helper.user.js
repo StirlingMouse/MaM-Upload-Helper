@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MaM Upload Helper
 // @namespace    Violentmonkey Scripts
-// @version      0.6.2
+// @version      0.6.3
 // @description  Adds other torrents, preview, check for creating new entities and more to the upload page
 // @author       Stirling Mouse
 // @match        https://www.myanonamouse.net/tor/upload.php
@@ -653,13 +653,17 @@
       if (e.currentTarget.value !== otherTorrentsLastSearchQuery) {
         otherTorrentsLastSearchQuery = e.currentTarget.value
 
-        searchTorrents(otherTorrentsLastSearchQuery, true)
+        searchTorrents(otherTorrentsLastSearchQuery, true, true)
       }
     })
     searchTorrents(otherTorrentsLastSearchQuery)
   }
 
-  async function searchTorrents(query, includeAuthor = false) {
+  async function searchTorrents(
+    query,
+    includeAuthor = false,
+    includeSeries = false,
+  ) {
     searchCount += 1
     otherTorrentsLastSearchQuery = query
     otherTorrentsSearchQuery.value = query
@@ -676,6 +680,7 @@
             srchIn: {
               title: 'true',
               author: includeAuthor ? 'true' : undefined,
+              series: includeSeries ? 'true' : undefined,
             },
           },
         }),
