@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MaM Upload Helper
 // @namespace    Violentmonkey Scripts
-// @version      0.6.3
+// @version      0.6.4
 // @description  Adds other torrents, preview, check for creating new entities and more to the upload page
 // @author       Stirling Mouse
 // @match        https://www.myanonamouse.net/tor/upload.php
@@ -736,7 +736,7 @@
         }
 
         if (t.poster_type) {
-          poster.src = `https://cdn.myanonamouse.net/tor/poster_mini.php/${t.id}/${t.poster_type.replace('image/', '')}`
+          poster.src = `https://cdn.myanonamouse.net/t/p/small/${t.id}.webp`
         }
 
         if (t.personal_freeleech) {
